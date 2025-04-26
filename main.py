@@ -2,7 +2,7 @@ import pyfirmata2
 import time
 import matplotlib.pyplot as plt
 
-# Set your Arduino's COM port
+# Set Arduino's COM port
 port = 'COM3'
 board = pyfirmata2.Arduino(port)
 board.samplingOn(100)
