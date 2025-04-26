@@ -51,7 +51,7 @@ except KeyboardInterrupt:
     board.exit()
 
     # Plot the press counts
-    print("Generating chart of completions...")
+    print("Generating chart of completions.")
     labels = [pin_names[n] for n in pin_numbers]
     counts = [press_counts[n] for n in pin_numbers]
 
