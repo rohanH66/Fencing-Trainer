@@ -1,6 +1,6 @@
-import pyfirmata2
 import time
-import matplotlib.pyplot as plt
+import pyfirmata2  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 
 # Set Arduino's COM port
 port = 'COM3'
@@ -19,7 +19,9 @@ pin_names = {
 # Setup pins and state tracking
 pins = {}
 pin_states = {}
-press_counts = {num: 0 for num in pin_numbers}  # Count presses per pin
+press_counts = {num: 0 for num in pin_numbers}
+last_press_time = {num: 0 for num in pin_numbers}
+DEBOUNCE_MS = 200  # debounce time in milliseconds
 
 for num in pin_numbers:
     pin = board.get_pin(f'd:{num}:i')
@@ -27,12 +29,15 @@ for num in pin_numbers:
     pins[num] = pin
     pin_states[num] = False
 
-# Callback factory with edge detection + logging
+# Callback factory with debounce logic
 def make_callback(pin_number):
     def pin_callback(value):
+        current_time = time.time() * 1000  # time in ms
         if value and not pin_states[pin_number]:  # Rising edge
-            print(f"Completed {pin_names[pin_number]}")
-            press_counts[pin_number] += 1
+            if current_time - last_press_time[pin_number] >= DEBOUNCE_MS:
+                print(f"Completed {pin_names[pin_number]}")
+                press_counts[pin_number] += 1
+                last_press_time[pin_number] = current_time
         pin_states[pin_number] = value
     return pin_callback
 
@@ -40,7 +45,7 @@ def make_callback(pin_number):
 for num in pin_numbers:
     pins[num].register_callback(make_callback(num))
 
-print("Checking for button presses.")
+print("Checking for button presses. Press Ctrl+C to stop.")
 
 try:
     while True:
